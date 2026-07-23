@@ -5,21 +5,21 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                echo 'Repository cloned successfully.'
+                echo 'Repository cloned successfully!'
             }
         }
 
-        stage('CI Pipeline') {
+        stage('Docker Build') {
             steps {
-                sh 'ls -la'
-                echo 'Jenkins Pipeline Executed Successfully!'
+                sh 'docker build -t cloud-app .'
             }
         }
 
-        stage('Build Complete') {
+        stage('Success') {
             steps {
-                echo 'Build Successful!'
+                echo 'Docker Image Built Successfully!'
             }
         }
+
     }
 }
