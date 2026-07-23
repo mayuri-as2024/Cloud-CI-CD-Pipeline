@@ -2,9 +2,10 @@ pipeline {
     agent any
 
     stages {
+
         stage('Install Dependencies') {
             steps {
-                bat 'cd app && npm install'
+                sh 'cd app && npm install'
             }
         }
 
@@ -13,5 +14,6 @@ pipeline {
                 echo 'Build Successful!'
             }
         }
+
     }
 }
