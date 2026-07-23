@@ -3,17 +3,23 @@ pipeline {
 
     stages {
 
-        stage('Install Dependencies') {
+        stage('Checkout') {
             steps {
-                sh 'cd app && npm install'
+                echo 'Repository cloned successfully.'
             }
         }
 
-        stage('Build') {
+        stage('CI Pipeline') {
+            steps {
+                sh 'ls -la'
+                echo 'Jenkins Pipeline Executed Successfully!'
+            }
+        }
+
+        stage('Build Complete') {
             steps {
                 echo 'Build Successful!'
             }
         }
-
     }
 }
