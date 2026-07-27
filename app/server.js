@@ -1,7 +1,19 @@
 const express = require("express");
+const healthRoute = require("./routes/health");
+const statusRoute = require("./routes/status");
+const versionRoute = require("./routes/version");
+const logsRoute = require("./routes/logs");
+const statsRoute = require("./routes/stats");
+const deployRoute = require("./routes/deploy");
 
 const app = express();
 const PORT = 3000;
+app.use("/health", healthRoute);
+app.use("/status", statusRoute);
+app.use("/version", versionRoute);
+app.use("/logs", logsRoute);
+app.use("/stats", statsRoute);
+app.use("/deploy", deployRoute);
 
 app.use(express.json());
 
