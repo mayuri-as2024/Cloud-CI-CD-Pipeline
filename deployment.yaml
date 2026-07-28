@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: clouddeployx
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: clouddeployx
+
+  template:
+    metadata:
+      labels:
+        app: clouddeployx
+
+    spec:
+      containers:
+      - name: clouddeployx
+        image: mayurias2024/cloud-app:v1
+        ports:
+        - containerPort: 3000
