@@ -1,5 +1,6 @@
 const express = require("express");
 const os = require("os");
+const client = require("prom-client");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -7,20 +8,59 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 
 // ======================
+// Prometheus Metrics
+// ======================
+
+const register = new client.Registry();
+
+client.collectDefaultMetrics({
+    register
+});
+
+// Custom metrics
+const requestCounter = new client.Counter({
+    name: "deployflow_http_requests_total",
+    help: "Total number of HTTP requests",
+    registers: [register]
+});
+
+const healthCounter = new client.Counter({
+    name: "deployflow_health_checks_total",
+    help: "Total number of health checks",
+    registers: [register]
+});
+
+const deploymentCounter = new client.Counter({
+    name: "deployflow_deployments_total",
+    help: "Total number of deployments",
+    registers: [register]
+});
+
+
+// ======================
 // Dashboard Home Page
 // ======================
+
 app.get("/", (req, res) => {
+
+requestCounter.inc();
+
 res.send(`
 
 <!DOCTYPE html>
 
 <html>
+
 <head>
+
 <meta charset="UTF-8">
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>DeployFlow Dashboard</title>
 
 <style>
+
 *{
     margin:0;
     padding:0;
@@ -122,6 +162,7 @@ footer{
     text-align:center;
     padding:20px;
 }
+
 </style>
 
 </head>
@@ -172,6 +213,7 @@ Cloud-Based Automated CI/CD Deployment Platform
 
 </div>
 
+
 <div class="section">
 
 <h2>Project Workflow</h2>
@@ -198,6 +240,7 @@ Cloud-Based Automated CI/CD Deployment Platform
 
 </div>
 
+
 <div class="section">
 
 <h2>Deployment Pipeline</h2>
@@ -221,138 +264,225 @@ DeployFlow | Software Engineering Cloud Project
 </body>
 
 </html>
-  `);
+
+`);
+
 });
+
 
 // ======================
 // Health API
 // ======================
+
 app.get("/health", (req, res) => {
+
+requestCounter.inc();
+healthCounter.inc();
+
 res.json({
+
 status: "Healthy",
+
 uptime: process.uptime().toFixed(2) + " seconds"
+
 });
+
 });
+
 
 // ======================
 // Status API
 // ======================
+
 app.get("/status", (req, res) => {
+
+requestCounter.inc();
+
 res.json({
+
 application: "DeployFlow",
+
 server: "Running",
+
 jenkins: "Configured",
+
 docker: "Available"
+
 });
+
 });
+
 
 // ======================
 // Version API
 // ======================
+
 app.get("/version", (req, res) => {
+
+requestCounter.inc();
+
 res.json({
+
 application: "DeployFlow",
+
 version: "1.0.0",
+
 release: "Production Ready"
+
 });
+
 });
+
 
 // ======================
 // Logs API
 // ======================
+
 app.get("/logs", (req, res) => {
+
+requestCounter.inc();
+
 res.json({
+
 logs: [
+
 "GitHub repository connected",
+
 "Jenkins pipeline executed successfully",
+
 "Docker image built successfully",
+
 "Docker image pushed to Docker Hub",
+
 "Kubernetes deployment created",
+
 "Service exposed successfully"
+
 ]
+
 });
+
 });
+
 
 // ======================
 // Deployment API
 // ======================
+
 app.get("/deployment", (req, res) => {
+
+requestCounter.inc();
+deploymentCounter.inc();
+
 res.json({
+
 application: "DeployFlow",
+
 version: "1.0.0",
+
 buildNumber: "#6",
+
 environment: "Development",
+
 pipelineStatus: "Connected",
+
 dockerStatus: "Running",
+
 dockerHub: "Image Available",
+
 kubernetesStatus: "Running",
+
 lastDeployment: "Successful"
+
 });
+
 });
+
 
 // ======================
 // Pipeline API
 // ======================
+
 app.get("/pipeline", (req, res) => {
+
+requestCounter.inc();
+
 res.json({
+
 repository: "GitHub",
+
 continuousIntegration: "Jenkins",
+
 containerization: "Docker",
+
 imageRegistry: "Docker Hub",
+
 orchestration: "Kubernetes",
+
 status: "Pipeline Working Successfully"
-});
+
 });
 
-// ======================
-// Metrics API
-// ======================
-app.get("/metrics", (req, res) => {
-res.json({
-application: "DeployFlow",
-hostname: os.hostname(),
-platform: os.platform(),
-architecture: os.arch(),
-cpuCores: os.cpus().length,
-totalMemory: Math.round(os.totalmem() / 1024 / 1024) + " MB",
-freeMemory: Math.round(os.freemem() / 1024 / 1024) + " MB",
-uptime: Math.floor(os.uptime() / 60) + " Minutes",
-nodeVersion: process.version,
-status: "Running"
 });
+
+
+// ======================
+// Prometheus Metrics API
+// ======================
+
+app.get("/metrics", async (req, res) => {
+
+res.set("Content-Type", register.contentType);
+
+res.end(await register.metrics());
+
 });
+
 
 // ======================
 // Deployment History API
 // ======================
+
 app.get("/history", (req, res) => {
+
+requestCounter.inc();
+
 res.json([
+
 {
 id: 1,
 version: "1.0.0",
 status: "Success",
 date: "23 July 2026"
 },
+
 {
 id: 2,
 version: "1.1.0",
 status: "Success",
 date: "26 July 2026"
 },
+
 {
 id: 3,
 version: "1.2.0",
 status: "Running",
 date: "31 July 2026"
 }
+
 ]);
+
 });
+
 
 // ======================
 // Start Server
 // ======================
+
 app.listen(PORT, () => {
-console.log(`DeployFlow server running on http://localhost:${PORT}`);
+
+console.log(
+`DeployFlow server running on http://localhost:${PORT}`
+);
+
 });
-
-
